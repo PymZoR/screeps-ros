@@ -17,10 +17,10 @@ function resetMemory() {
 }
 
 // TODO: cleanup pubsub of killed process
-export function killProcess(source: number, pid: number) {
+export function killProcess(source: number, pid: number): void {
   delete Memory.processes[pid];
 
-  let nextPubsub: typeof Memory.pubsub = {};
+  const nextPubsub: typeof Memory.pubsub = {};
 
   for (const [topicName, topic] of Object.entries(Memory.pubsub)) {
     const nextTopic = {
@@ -38,7 +38,7 @@ export function killProcess(source: number, pid: number) {
   Memory.pubsub = nextPubsub;
 }
 
-export function displayProcessTable() {
+export function displayProcessTable(): void {
   console.log("PID     Type");
   console.log("------------");
 
@@ -49,11 +49,11 @@ export function displayProcessTable() {
   console.log("\n");
 }
 
-export function init() {
+export function init(): void {
   initMemory();
 }
 
-export function loop() {
+export function loop(): void {
   const processes = new Map<number, Process>(
     Object.values(Memory.processes).map(process => unserializeProcess(process.repr, spawnProcess))
   );
@@ -62,9 +62,9 @@ export function loop() {
 
   tickLimit.init();
 
-  const start = Date.now();
-  const subdiv = [start + 20, start + 40, start + 60, start + 80];
-  const delta = 1;
+  // const start = Date.now();
+  // const subdiv = [start + 20, start + 40, start + 60, start + 80];
+  // const delta = 1;
 
   // Execute processes until all Cpu is used
   while (tickLimit.getCurrentlyUsed() < 0.95) {
@@ -77,9 +77,9 @@ export function loop() {
     // subdiv.shift()
 
     // Copy current active processes
-    const processes_ = new Map(processes);
+    const processesCopy = new Map(processes);
 
-    for (const [pid, process] of processes_) {
+    for (const [pid, process] of processesCopy) {
       // process.processSignals();
 
       // Check if process is sleeping
@@ -90,7 +90,8 @@ export function loop() {
 
       // Check if process is waiting for a message
       // TODO: type topic
-      let topic: any;
+      type TopicKey = keyof typeof Memory.pubsub;
+      let topic: typeof Memory.pubsub[TopicKey] | undefined;
       let message: any;
 
       if (waitingProcesses.has(pid)) {
@@ -99,10 +100,10 @@ export function loop() {
         // TODO: call with array of messages instead of 1 at a time (if process is subscribing to multiple topics)
         let messageAvailable = false;
 
-        for (const topic_ of Object.values(Memory.pubsub)) {
-          if (topic_.listeners.some(value => value === pid) && topic_.messages.length !== 0) {
-            topic = topic_;
-            message = topic_.messages[0];
+        for (const topicCopy of Object.values(Memory.pubsub)) {
+          if (topicCopy.listeners.some(listenerPid => listenerPid === pid) && topicCopy.messages.length !== 0) {
+            topic = topicCopy;
+            message = topicCopy.messages[0];
             messageAvailable = true;
             break;
           }
@@ -117,14 +118,14 @@ export function loop() {
       const { value, done } = process.tick.next(message);
       // Pop message
       if (message) {
-        topic.messages.shift();
+        topic?.messages.shift();
       }
 
       // If blocking IO, put process in waitingProcesses
-      if (value.type === "wait") {
+      if (value && value.type === "wait") {
         waitingProcesses.set(pid, process);
-      } else if (value.type === "sleep") {
-        //TODO: process write to memory, not kernel
+      } else if (value && value.type === "sleep") {
+        // TODO: process write to memory, not kernel
         Memory.processes[pid].sleepingUntil = value.data;
       }
 

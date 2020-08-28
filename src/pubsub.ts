@@ -1,4 +1,4 @@
-export function subscribe(client: number, topicName: string) {
+export function subscribe(client: number, topicName: string): void {
   let topic = Memory.pubsub[topicName];
 
   if (!topic) {
@@ -6,7 +6,7 @@ export function subscribe(client: number, topicName: string) {
       listeners: [],
       messages: []
     };
-  } else if (topic.listeners.indexOf(client) != -1) {
+  } else if (topic.listeners.indexOf(client) !== -1) {
     // Already subscribed
     return;
   }
@@ -14,7 +14,7 @@ export function subscribe(client: number, topicName: string) {
   topic.listeners.push(client);
 }
 
-export function unsubscribe(client: number, topicName: string) {
+export function unsubscribe(client: number, topicName: string): void {
   if (!Memory.pubsub[topicName]) {
     return;
   }
@@ -23,7 +23,7 @@ export function unsubscribe(client: number, topicName: string) {
   const topic = Memory.pubsub[topicName];
   const index = topic.listeners.indexOf(client);
 
-  if (index != -1) {
+  if (index !== -1) {
     topic.listeners.splice(index, 1);
   }
 
@@ -34,7 +34,13 @@ export function unsubscribe(client: number, topicName: string) {
 }
 
 // TODO: option to latch
-export function Publisher<T>(client: number, topicName: string) {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function Publisher<TMsg extends object>(
+  client: number,
+  topicName: string
+): {
+  publish(msg: TMsg): { type: "publish" };
+} {
   if (!Memory.pubsub[topicName]) {
     Memory.pubsub[topicName] = {
       listeners: [],
@@ -45,10 +51,10 @@ export function Publisher<T>(client: number, topicName: string) {
   const topic = Memory.pubsub[topicName];
 
   return {
-    publish: function (msg: T) {
+    publish(msg: TMsg) {
       topic.messages.push({
         source: client,
-        data: msg
+        data: msg as Record<string, unknown>
       });
 
       return {

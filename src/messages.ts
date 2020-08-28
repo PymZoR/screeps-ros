@@ -1,3 +1,3 @@
-export type TalkerMsg = {
+export interface TalkerMsg {
   msg: string;
-};
+}

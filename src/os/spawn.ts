@@ -1,11 +1,12 @@
-import { Process } from "./process";
-import { Talker } from "processes/talker";
 import { Listener } from "processes/listener";
+import { Process } from "./process";
+import { Ressource } from "processes/ressource";
+import { Talker } from "processes/talker";
 import { switchGuard } from "utils/switchGuard";
 
-export function spawnProcess(type: ProcessType, options?: { pid?: number; args?: Array<any> }): Process {
+export function spawnProcess(type: ProcessType, options?: { pid?: number; args?: any[] }): Process {
   const pid = options?.pid ?? getNextPid();
-  let processObject: Process;
+  let processObject: Process<Record<string, any>>;
 
   switch (type) {
     case "Talker":
@@ -14,6 +15,10 @@ export function spawnProcess(type: ProcessType, options?: { pid?: number; args?:
 
     case "Listener":
       processObject = new Listener(pid);
+      break;
+
+    case "Ressource":
+      processObject = new Ressource(pid);
       break;
 
     default:

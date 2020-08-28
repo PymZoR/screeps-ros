@@ -1,13 +1,28 @@
 import * as pubsub from "pubsub";
 
-export abstract class Process {
-  pid: number;
-  type: ProcessType;
-  memory: any;
-  active: boolean;
-  tick: Generator<any, boolean, any>;
+interface ProcessYieldMessage {
+  type: "wait";
+}
 
-  constructor(pid: number) {
+interface ProcessSleepMessage {
+  type: "sleep";
+  data: number;
+}
+
+interface ProcessPublishMessage {
+  type: "publish";
+}
+
+export type ProcessMessage = ProcessYieldMessage | ProcessSleepMessage | ProcessPublishMessage;
+
+export abstract class Process<TMemory = Record<string, unknown>, TInputMessageData = Record<string, unknown>> {
+  public pid: number;
+  public type: ProcessType;
+  public memory: TMemory;
+  public active: boolean;
+  public tick: Generator<ProcessMessage, void, TInputMessageData>;
+
+  public constructor(pid: number) {
     this.pid = pid;
     this.type = this.getType();
     this.active = true;
@@ -15,29 +30,40 @@ export abstract class Process {
     // Restore or init memory
     if (!Memory.processes[this.pid]) {
       registerProcess(this);
-      this.memory = Memory.processes[this.pid].memory;
+      this.memory = {} as TMemory;
       this.setup();
       console.log("setup");
     }
 
-    this.memory = Memory.processes[this.pid].memory;
+    this.memory = Memory.processes[this.pid].memory as TMemory;
     this.tick = this.execute();
   }
 
   abstract getType(): ProcessType;
 
-  setup() {}
+  public setup(): void {
+    return;
+  }
 
-  abstract execute(): Generator<string | undefined, boolean, any>;
+  abstract execute(): Generator<ProcessMessage, void, TInputMessageData>;
 
-  onSIGINT(): void {}
+  public onSIGINT(): void {
+    return;
+  }
 
-  processSignals(): void {
+  public processSignals(): void {
     const signalsTopic = Memory.pubsub[`/${this.pid}`];
 
     for (const message of signalsTopic.messages) {
-      if (message.data?.type === "signal") {
-        switch (message.data.signal) {
+      const data = message.data as
+        | {
+            type: "signal";
+            signal: "SIGINT";
+          }
+        | undefined;
+
+      if (data?.type === "signal") {
+        switch (data.signal) {
           case "SIGINT":
             this.active = false;
             this.onSIGINT();
@@ -49,7 +75,7 @@ export abstract class Process {
     signalsTopic.messages = [];
   }
 
-  serialize(): SerializedProcess {
+  public serialize(): SerializedProcess {
     return {
       pid: this.pid,
       type: this.type,
@@ -57,17 +83,20 @@ export abstract class Process {
     };
   }
 
-  subscribe(topicName: string) {
+  public subscribe(topicName: string): void {
     pubsub.subscribe(this.pid, topicName);
   }
 }
 
-function registerProcess(processObject: Process) {
+function registerProcess(processObject: Process<Record<string, any>, Record<string, any>>): void {
   Memory.processes[processObject.pid] = { repr: processObject.serialize(), memory: {}, sleepingUntil: 0 };
   processObject.subscribe(`/${processObject.pid}`);
 }
 
-export function unserializeProcess(serializedProcess: SerializedProcess, spawnProcess: Function): [number, Process] {
+export function unserializeProcess(
+  serializedProcess: SerializedProcess,
+  spawnProcess: (type: ProcessType, params: { pid: number }) => Process
+): [number, Process] {
   const processObject = spawnProcess(serializedProcess.type, { pid: serializedProcess.pid });
 
   return [serializedProcess.pid, processObject];

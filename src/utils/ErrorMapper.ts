@@ -2,14 +2,14 @@ import { SourceMapConsumer } from "source-map";
 
 export class ErrorMapper {
   // Cache consumer
-  private static _consumer?: SourceMapConsumer;
+  private static mConsumer?: SourceMapConsumer;
 
   public static get consumer(): SourceMapConsumer {
-    if (this._consumer == null) {
-      this._consumer = new SourceMapConsumer(require("main.js.map"));
+    if (this.mConsumer == null) {
+      this.mConsumer = new SourceMapConsumer(require("main.js.map"));
     }
 
-    return this._consumer;
+    return this.mConsumer;
   }
 
   // Cache previously mapped traces to improve performance

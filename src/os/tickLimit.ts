@@ -1,4 +1,9 @@
-export function buildSimulationTickLimit() {
+interface TickLimit {
+  init: () => void;
+  getCurrentlyUsed: () => number;
+}
+
+export function buildSimulationTickLimit(): TickLimit {
   let startTime: number;
   const limit = 100;
 
@@ -16,8 +21,10 @@ export function buildSimulationTickLimit() {
   };
 }
 
-export function buildProductionTickLimit() {
-  function init() {}
+export function buildProductionTickLimit(): TickLimit {
+  function init() {
+    return;
+  }
 
   function getCurrentlyUsed() {
     return Game.cpu.getUsed() / Game.cpu.tickLimit;
@@ -29,11 +36,11 @@ export function buildProductionTickLimit() {
   };
 }
 
-export function isSimulationMode() {
-  return !Number.isFinite(Game.cpu.tickLimit);
+export function isSimulationMode(): boolean {
+  return !isFinite(Game.cpu.tickLimit);
 }
 
-export function buildTickLimit() {
+export function buildTickLimit(): TickLimit {
   if (isSimulationMode()) {
     return buildSimulationTickLimit();
   }

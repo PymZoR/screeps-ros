@@ -1,24 +1,21 @@
 import { Process } from "os/process";
-import { TalkerMsg } from "messages";
 
-export class Listener extends Process {
-  getType(): ProcessType {
+export class Listener extends Process<Record<string, never>> {
+  public getType(): ProcessType {
     return "Listener";
   }
 
-  *execute(): Generator<any, boolean, any> {
+  public *execute(): Generator<any, void, any> {
     this.subscribe("/test");
     // TODO: unsubscrive on process kill
 
     while (this.active) {
-      const msg: any = yield { type: "wait" };
+      const msg: { data: string } = yield { type: "wait" };
       console.log(`recv: ${JSON.stringify(msg.data)}`);
     }
-
-    return this.active;
   }
 
-  onSIGINT() {
+  public onSIGINT(): void {
     console.log(`${this.pid} - Listener SIGINT`);
   }
 }

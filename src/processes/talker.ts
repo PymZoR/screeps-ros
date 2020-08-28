@@ -1,21 +1,23 @@
-import { Process } from "os/process";
-import { TalkerMsg } from "messages";
 import * as pubsub from "../pubsub";
+import { Process, ProcessMessage } from "os/process";
+import { TalkerMsg } from "messages";
 
-export class Talker extends Process {
-  getType(): ProcessType {
+interface TalkerMemory {
+  i: number;
+}
+
+export class Talker extends Process<TalkerMemory> {
+  public getType(): ProcessType {
     return "Talker";
   }
 
-  onSIGINT() {
+  public onSIGINT(): void {
     console.log(`${this.pid} - Talker SIGINT`);
   }
 
-  setup() {
-    this.memory.i = 0;
-  }
+  public *execute(): Generator<ProcessMessage, void, Record<string, unknown>> {
+    this.memory.i = this.memory.i ?? 0;
 
-  *execute(): Generator<any, boolean, any> {
     const publisher = pubsub.Publisher<TalkerMsg>(this.pid, "/test");
 
     while (this.active) {
@@ -28,7 +30,5 @@ export class Talker extends Process {
         data: Date.now() + 3000
       };
     }
-
-    return this.active;
   }
 }

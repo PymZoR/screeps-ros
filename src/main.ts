@@ -1,6 +1,6 @@
-import { ErrorMapper } from "utils/ErrorMapper";
-import * as kernel from "os/kernel";
 import "console";
+import * as kernel from "os/kernel";
+import { ErrorMapper } from "utils/ErrorMapper";
 
 function main() {
   // console.log(`Current game tick is ${Game.time}`);
