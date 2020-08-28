@@ -62,6 +62,12 @@ export function loop(): void {
 
   const waitingProcesses = new Map<number, Process>();
 
+  for (const creepName of Object.keys(Memory.creeps)) {
+    if (!Game.creeps[creepName]) {
+      delete Memory.creeps[creepName];
+    }
+  }
+
   tickLimit.init();
 
   // const start = Date.now();
