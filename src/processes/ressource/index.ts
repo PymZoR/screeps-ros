@@ -69,8 +69,11 @@ export class Ressource extends Process<RessourceMemory> {
     const creeps = spawn.room.find(FIND_MY_CREEPS);
 
     const nextSource = bestSources[0];
-    for (const creep of creeps) {
-      harvest(creep, nextSource.source);
+
+    if (nextSource) {
+      for (const creep of creeps) {
+        harvest(creep, nextSource.source);
+      }
     }
 
     yield { type: "sleep", data: Date.now() + 50 };
