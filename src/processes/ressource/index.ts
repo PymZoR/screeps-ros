@@ -37,12 +37,10 @@ export class Ressource extends Process<RessourceMemory> {
 
       const maxWorkers = this.countWorkablePositions(room, pos);
 
-      if (maxWorkers > this.memory.harvestersCount) {
-        result.push({
-          source,
-          neededWorkerAmount: maxWorkers - this.memory.harvestersCount
-        });
-      }
+      result.push({
+        source,
+        neededWorkerAmount: maxWorkers - this.memory.harvestersCount
+      });
     }
 
     return result;
@@ -55,8 +53,9 @@ export class Ressource extends Process<RessourceMemory> {
     this.memory.harvestersCount = this.memory.harvestersCount ?? spawn.room.find(FIND_MY_CREEPS).length;
 
     const bestSources = this.getBestSourcesToHarvest(spawn);
+    const nextSource = bestSources[0];
 
-    if (bestSources.length) {
+    if (nextSource?.neededWorkerAmount > 0) {
       const spawnCreepOutcome = spawn.spawnCreep(
         ["move", "work", "carry"],
         `${spawn.room.name}/polyvalent-harvester-${this.memory.harvestersCount}`
@@ -68,8 +67,6 @@ export class Ressource extends Process<RessourceMemory> {
     }
 
     const creeps = spawn.room.find(FIND_MY_CREEPS);
-
-    const nextSource = bestSources[0];
 
     if (nextSource) {
       for (const creep of creeps) {
