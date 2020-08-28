@@ -1,5 +1,5 @@
 import { Process, ProcessMessage } from "os/process";
-import { harvest } from "./harvester";
+import { harvester } from "./harvester";
 
 interface RessourceMemory {
   harvestersCount: number;
@@ -27,7 +27,9 @@ export class Ressource extends Process<RessourceMemory> {
     return workablePositions;
   }
 
-  public getBestSourcesToHarvest(spawn: StructureSpawn): { source: Source; neededWorkerAmount: number }[] {
+  public getBestSourcesToHarvest(
+    spawn: StructureSpawn
+  ): { source: Source; neededWorkerAmount: number }[] {
     const roomSources = spawn.room.find(FIND_SOURCES);
 
     const result: { source: Source; neededWorkerAmount: number }[] = [];
@@ -70,7 +72,7 @@ export class Ressource extends Process<RessourceMemory> {
 
     if (nextSource) {
       for (const creep of creeps) {
-        harvest(creep, nextSource.source);
+        harvester(creep, nextSource.source, spawn);
       }
     }
 

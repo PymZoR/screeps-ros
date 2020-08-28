@@ -55,7 +55,9 @@ export function init(): void {
 
 export function loop(): void {
   const processes = new Map<number, Process>(
-    Object.values(Memory.processes).map(process => unserializeProcess(process.repr, spawnProcess))
+    Object.values(Memory.processes).map(process =>
+      unserializeProcess(process.repr, spawnProcess)
+    )
   );
 
   const waitingProcesses = new Map<number, Process>();
@@ -101,7 +103,10 @@ export function loop(): void {
         let messageAvailable = false;
 
         for (const topicCopy of Object.values(Memory.pubsub)) {
-          if (topicCopy.listeners.some(listenerPid => listenerPid === pid) && topicCopy.messages.length !== 0) {
+          if (
+            topicCopy.listeners.some(listenerPid => listenerPid === pid) &&
+            topicCopy.messages.length !== 0
+          ) {
             topic = topicCopy;
             message = topicCopy.messages[0];
             messageAvailable = true;
@@ -147,6 +152,6 @@ export function loop(): void {
   global.processes = processes;
 }
 
-export function reset() {
+export function reset(): void {
   resetMemory();
 }

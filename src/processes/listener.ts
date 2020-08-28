@@ -10,6 +10,7 @@ export class Listener extends Process<Record<string, never>> {
     // TODO: unsubscrive on process kill
 
     while (this.active) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const msg: { data: string } = yield { type: "wait" };
       console.log(`recv: ${JSON.stringify(msg.data)}`);
     }

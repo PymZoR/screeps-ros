@@ -4,7 +4,10 @@ import { Ressource } from "processes/ressource";
 import { Talker } from "processes/talker";
 import { switchGuard } from "utils/switchGuard";
 
-export function spawnProcess(type: ProcessType, options?: { pid?: number; args?: any[] }): Process {
+export function spawnProcess(
+  type: ProcessType,
+  options?: { pid?: number; args?: any[] }
+): Process {
   const pid = options?.pid ?? getNextPid();
   let processObject: Process<Record<string, any>>;
 

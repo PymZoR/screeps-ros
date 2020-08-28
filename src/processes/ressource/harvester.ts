@@ -1,4 +1,6 @@
-export function harvest(creep: Creep, source: Source): void {
+import { priorityExecute } from "utils/priorityExecute";
+
+export function harvest(creep: Creep, source: Source): boolean {
   const room = creep.room;
 
   if (creep.store[RESOURCE_ENERGY] < creep.store.getCapacity()) {
@@ -34,4 +36,37 @@ export function harvest(creep: Creep, source: Source): void {
       }
     }
   }
+
+  return true;
+}
+
+export function recycle(
+  creep: Creep,
+  source: Source,
+  spawn: StructureSpawn
+): boolean {
+  const pathLengthToSpawn = creep.pos.findPathTo(spawn).length;
+
+  if (creep.ticksToLive === pathLengthToSpawn) {
+    creep.moveTo(spawn);
+
+    if (pathLengthToSpawn < 1) {
+      spawn.recycleCreep(creep);
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+export function harvester(
+  creep: Creep,
+  source: Source,
+  spawn: StructureSpawn
+): void {
+  priorityExecute([
+    () => recycle(creep, source, spawn),
+    () => harvest(creep, source)
+  ]);
 }

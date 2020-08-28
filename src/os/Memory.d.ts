@@ -8,7 +8,14 @@ interface SerializedProcess {
 
 interface Memory {
   init: boolean;
-  processes: Record<number, { repr: SerializedProcess; sleepingUntil: number; memory: Record<string, unknown> }>;
+  processes: Record<
+    number,
+    {
+      repr: SerializedProcess;
+      sleepingUntil: number;
+      memory: Record<string, unknown>;
+    }
+  >;
   pubsub: Record<
     string,
     {

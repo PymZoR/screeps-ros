@@ -13,9 +13,15 @@ interface ProcessPublishMessage {
   type: "publish";
 }
 
-export type ProcessMessage = ProcessYieldMessage | ProcessSleepMessage | ProcessPublishMessage;
+export type ProcessMessage =
+  | ProcessYieldMessage
+  | ProcessSleepMessage
+  | ProcessPublishMessage;
 
-export abstract class Process<TMemory = Record<string, unknown>, TInputMessageData = Record<string, unknown>> {
+export abstract class Process<
+  TMemory = Record<string, unknown>,
+  TInputMessageData = Record<string, unknown>
+> {
   public pid: number;
   public type: ProcessType;
   public memory: TMemory;
@@ -88,8 +94,14 @@ export abstract class Process<TMemory = Record<string, unknown>, TInputMessageDa
   }
 }
 
-function registerProcess(processObject: Process<Record<string, any>, Record<string, any>>): void {
-  Memory.processes[processObject.pid] = { repr: processObject.serialize(), memory: {}, sleepingUntil: 0 };
+function registerProcess(
+  processObject: Process<Record<string, any>, Record<string, any>>
+): void {
+  Memory.processes[processObject.pid] = {
+    repr: processObject.serialize(),
+    memory: {},
+    sleepingUntil: 0
+  };
   processObject.subscribe(`/${processObject.pid}`);
 }
 
@@ -97,7 +109,9 @@ export function unserializeProcess(
   serializedProcess: SerializedProcess,
   spawnProcess: (type: ProcessType, params: { pid: number }) => Process
 ): [number, Process] {
-  const processObject = spawnProcess(serializedProcess.type, { pid: serializedProcess.pid });
+  const processObject = spawnProcess(serializedProcess.type, {
+    pid: serializedProcess.pid
+  });
 
   return [serializedProcess.pid, processObject];
 }
