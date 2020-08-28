@@ -12,12 +12,19 @@ export function harvest(creep: Creep, source: Source): void {
     // Carry
     const targets = room.find(FIND_MY_STRUCTURES, {
       filter: structure => {
-        return (
-          (structure.structureType === STRUCTURE_EXTENSION ||
-            structure.structureType === STRUCTURE_SPAWN ||
-            structure.structureType === STRUCTURE_TOWER) &&
-          structure.energy < structure.energyCapacity
-        );
+        if (
+          structure.structureType === STRUCTURE_EXTENSION ||
+          structure.structureType === STRUCTURE_SPAWN ||
+          structure.structureType === STRUCTURE_TOWER
+        ) {
+          return structure.energy < structure.energyCapacity;
+        }
+
+        if (structure.structureType === STRUCTURE_CONTROLLER) {
+          return true;
+        }
+
+        return false;
       }
     });
 
