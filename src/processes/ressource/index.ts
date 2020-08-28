@@ -50,7 +50,7 @@ export class Ressource extends Process<RessourceMemory> {
     // setup
     const spawn = Game.spawns[Object.keys(Game.spawns)[0]];
 
-    this.memory.harvestersCount = this.memory.harvestersCount ?? spawn.room.find(FIND_MY_CREEPS).length;
+    this.memory.harvestersCount = spawn.room.find(FIND_MY_CREEPS).length;
 
     const bestSources = this.getBestSourcesToHarvest(spawn);
     const nextSource = bestSources[0];
