@@ -21,8 +21,7 @@ Object.defineProperty(global, "launch", {
   configurable: true,
   enumerable: true,
   get() {
-    spawnProcess("Talker");
-    spawnProcess("Listener");
+    spawnProcess("Ressource");
   }
 });
 
