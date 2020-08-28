@@ -50,9 +50,10 @@ export class Ressource extends Process<RessourceMemory> {
 
   public *execute(): Generator<ProcessMessage, void, Record<string, unknown>> {
     // setup
-    this.memory.harvestersCount = this.memory.harvestersCount ?? 0;
-
     const spawn = Game.spawns[Object.keys(Game.spawns)[0]];
+
+    this.memory.harvestersCount = this.memory.harvestersCount ?? spawn.room.find(FIND_MY_CREEPS).length;
+
     const bestSources = this.getBestSourcesToHarvest(spawn);
 
     if (bestSources.length) {
